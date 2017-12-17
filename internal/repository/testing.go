@@ -27,6 +27,12 @@ type logger interface {
 
 // TestUseLowSecurityKDFParameters configures low-security KDF parameters for testing.
 func TestUseLowSecurityKDFParameters(t logger) {
+	if testingTB, ok := t.(testing.TB); ok {
+		test.Helper(testingTB).Helper()
+	}
+	if testingTB, ok := t.(testing.TB); ok {
+		test.Helper(testingTB).Helper()
+	}
 	t.Logf("using low-security KDF parameters for test")
 	Params = &testKDFParams
 }
@@ -42,6 +48,7 @@ const testChunkerPol = chunker.Pol(0x3DA3358B4DC173)
 // password. If be is nil, an in-memory backend is used. A constant polynomial
 // is used for the chunker and low-security test parameters.
 func TestRepositoryWithBackend(t testing.TB, be restic.Backend) (r restic.Repository, cleanup func()) {
+	test.Helper(t).Helper()
 	TestUseLowSecurityKDFParameters(t)
 
 	var beCleanup func()
@@ -69,6 +76,7 @@ func TestRepositoryWithBackend(t testing.TB, be restic.Backend) (r restic.Reposi
 // a non-existing directory, a local backend is created there and this is used
 // instead. The directory is not removed, but left there for inspection.
 func TestRepository(t testing.TB) (r restic.Repository, cleanup func()) {
+	test.Helper(t).Helper()
 	dir := os.Getenv("RESTIC_TEST_REPO")
 	if dir != "" {
 		_, err := os.Stat(dir)
