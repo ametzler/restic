@@ -176,17 +176,17 @@ func TestTestWalkFiles(t *testing.T) {
 				},
 				"x": TestDir{
 					"y": TestDir{
-						"link": TestSymlink{Target: "../../foo"},
+						"link": TestSymlink{Target: filepath.FromSlash("../../foo")},
 					},
 				},
 			},
 			want: map[string]string{
-				"foo":            "<File>",
-				"subdir":         "<Dir>",
-				"subdir/subfile": "<File>",
-				"x":              "<Dir>",
-				"x/y":            "<Dir>",
-				"x/y/link":       "<Symlink>",
+				"foo":    "<File>",
+				"subdir": "<Dir>",
+				filepath.FromSlash("subdir/subfile"): "<File>",
+				"x": "<Dir>",
+				filepath.FromSlash("x/y"):      "<Dir>",
+				filepath.FromSlash("x/y/link"): "<Symlink>",
 			},
 		},
 	}
@@ -351,9 +351,9 @@ func TestTestEnsureSnapshot(t *testing.T) {
 	}{
 		{
 			files: map[string]interface{}{
-				"foo":            TestFile{Content: "foo"},
-				"subdir/subfile": TestFile{Content: "bar"},
-				"x/y/link":       TestSymlink{Target: "../../foo"},
+				"foo": TestFile{Content: "foo"},
+				filepath.FromSlash("subdir/subfile"): TestFile{Content: "bar"},
+				filepath.FromSlash("x/y/link"):       TestSymlink{Target: filepath.FromSlash("../../foo")},
 			},
 			want: TestDir{
 				"foo": TestFile{Content: "foo"},
@@ -362,7 +362,7 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				},
 				"x": TestDir{
 					"y": TestDir{
-						"link": TestSymlink{Target: "../../foo"},
+						"link": TestSymlink{Target: filepath.FromSlash("../../foo")},
 					},
 				},
 			},
@@ -410,7 +410,7 @@ func TestTestEnsureSnapshot(t *testing.T) {
 		{
 			expectFailure: true,
 			files: map[string]interface{}{
-				"foo": TestSymlink{Target: "/x"},
+				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
 			},
 			want: TestDir{
 				"foo": TestFile{Content: "foo"},
@@ -419,10 +419,10 @@ func TestTestEnsureSnapshot(t *testing.T) {
 		{
 			expectFailure: true,
 			files: map[string]interface{}{
-				"foo": TestSymlink{Target: "/x"},
+				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
 			},
 			want: TestDir{
-				"foo": TestSymlink{Target: "/y"},
+				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/y"))},
 			},
 		},
 		{
