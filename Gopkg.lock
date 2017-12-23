@@ -68,6 +68,12 @@
   revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
 
 [[projects]]
+  name = "github.com/google/go-cmp"
+  packages = ["cmp","cmp/internal/diff","cmp/internal/function","cmp/internal/value"]
+  revision = "8099a9787ce5dc5984ed879a3bda47dc730a8e97"
+  version = "v0.1.0"
+
+[[projects]]
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
   revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
@@ -214,6 +220,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f0a207197cb502238ac87ca8e07b2640c02ec380a50b036e09ef87e40e31ca2d"
+  inputs-digest = "9e09703534008ba31ebc288b7379e085ee372158ef6e7b48bac3054cdd0b7fc8"
   solver-name = "gps-cdcl"
   solver-version = 1
