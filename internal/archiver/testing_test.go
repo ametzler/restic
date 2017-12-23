@@ -88,7 +88,7 @@ func TestTestCreateFiles(t *testing.T) {
 				},
 				"sub": TestDir{
 					"subsub": TestDir{
-						"link": TestSymlink{Target: "/x"},
+						"link": TestSymlink{Target: filepath.FromSlash("x/y/z")},
 					},
 				},
 			},
