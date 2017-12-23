@@ -96,7 +96,7 @@ func TestTestCreateFiles(t *testing.T) {
 				"foo":             TestFile{Content: "foo"},
 				"subdir":          TestDir{},
 				"subdir/subfile":  TestFile{Content: "bar"},
-				"sub/subsub/link": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
+				"sub/subsub/link": TestSymlink{Target: filepath.FromSlash("x/y/z")},
 			},
 		},
 	}
@@ -410,7 +410,7 @@ func TestTestEnsureSnapshot(t *testing.T) {
 		{
 			expectFailure: true,
 			files: map[string]interface{}{
-				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
+				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z")},
 			},
 			want: TestDir{
 				"foo": TestFile{Content: "foo"},
@@ -419,10 +419,10 @@ func TestTestEnsureSnapshot(t *testing.T) {
 		{
 			expectFailure: true,
 			files: map[string]interface{}{
-				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
+				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z")},
 			},
 			want: TestDir{
-				"foo": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/y"))},
+				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z2")},
 			},
 		},
 		{
