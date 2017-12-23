@@ -135,9 +135,9 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/user1", "foo/user2", "foo/other"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"user1": ArchiveTree{Path: "foo/user1"},
-					"user2": ArchiveTree{Path: "foo/user2"},
-					"other": ArchiveTree{Path: "foo/other"},
+					"user1": ArchiveTree{Path: filepath.FromSlash("foo/user1")},
+					"user2": ArchiveTree{Path: filepath.FromSlash("foo/user2")},
+					"other": ArchiveTree{Path: filepath.FromSlash("foo/other")},
 				}},
 			}},
 		},
@@ -145,9 +145,9 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/work/user1", "foo/work/user2"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"work": ArchiveTree{FileInfoPath: "foo/work", Nodes: map[string]ArchiveTree{
-						"user1": ArchiveTree{Path: "foo/work/user1"},
-						"user2": ArchiveTree{Path: "foo/work/user2"},
+					"work": ArchiveTree{FileInfoPath: filepath.FromSlash("foo/work"), Nodes: map[string]ArchiveTree{
+						"user1": ArchiveTree{Path: filepath.FromSlash("foo/work/user1")},
+						"user2": ArchiveTree{Path: filepath.FromSlash("foo/work/user2")},
 					}},
 				}},
 			}},
@@ -156,25 +156,25 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/user1", "bar/user1", "foo/other"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"user1": ArchiveTree{Path: "foo/user1"},
-					"other": ArchiveTree{Path: "foo/other"},
+					"user1": ArchiveTree{Path: filepath.FromSlash("foo/user1")},
+					"other": ArchiveTree{Path: filepath.FromSlash("foo/other")},
 				}},
 				"bar": ArchiveTree{Root: ".", FileInfoPath: "bar", Nodes: map[string]ArchiveTree{
-					"user1": ArchiveTree{Path: "bar/user1"},
+					"user1": ArchiveTree{Path: filepath.FromSlash("bar/user1")},
 				}},
 			}},
 		},
 		{
 			targets: []string{"../work"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
-				"work": ArchiveTree{Root: "..", Path: "../work"},
+				"work": ArchiveTree{Root: "..", Path: filepath.FromSlash("../work")},
 			}},
 		},
 		{
 			targets: []string{"../work/other"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
-				"work": ArchiveTree{Root: "..", FileInfoPath: "../work", Nodes: map[string]ArchiveTree{
-					"other": ArchiveTree{Path: "../work/other"},
+				"work": ArchiveTree{Root: "..", FileInfoPath: filepath.FromSlash("../work"), Nodes: map[string]ArchiveTree{
+					"other": ArchiveTree{Path: filepath.FromSlash("../work/other")},
 				}},
 			}},
 		},
@@ -182,11 +182,11 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/user1", "../work/other", "foo/user2"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"user1": ArchiveTree{Path: "foo/user1"},
-					"user2": ArchiveTree{Path: "foo/user2"},
+					"user1": ArchiveTree{Path: filepath.FromSlash("foo/user1")},
+					"user2": ArchiveTree{Path: filepath.FromSlash("foo/user2")},
 				}},
-				"work": ArchiveTree{Root: "..", FileInfoPath: "../work", Nodes: map[string]ArchiveTree{
-					"other": ArchiveTree{Path: "../work/other"},
+				"work": ArchiveTree{Root: "..", FileInfoPath: filepath.FromSlash("../work"), Nodes: map[string]ArchiveTree{
+					"other": ArchiveTree{Path: filepath.FromSlash("../work/other")},
 				}},
 			}},
 		},
@@ -194,11 +194,11 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/user1", "../foo/other", "foo/user2"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"user1": ArchiveTree{Path: "foo/user1"},
-					"user2": ArchiveTree{Path: "foo/user2"},
+					"user1": ArchiveTree{Path: filepath.FromSlash("foo/user1")},
+					"user2": ArchiveTree{Path: filepath.FromSlash("foo/user2")},
 				}},
-				"foo-1": ArchiveTree{Root: "..", FileInfoPath: "../foo", Nodes: map[string]ArchiveTree{
-					"other": ArchiveTree{Path: "../foo/other"},
+				"foo-1": ArchiveTree{Root: "..", FileInfoPath: filepath.FromSlash("../foo"), Nodes: map[string]ArchiveTree{
+					"other": ArchiveTree{Path: filepath.FromSlash("../foo/other")},
 				}},
 			}},
 		},
@@ -207,10 +207,10 @@ func TestNewArchiveTree(t *testing.T) {
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
 					"work": ArchiveTree{
-						FileInfoPath: "foo/work",
-						Path:         "foo/work",
+						FileInfoPath: filepath.FromSlash("foo/work"),
+						Path:         filepath.FromSlash("foo/work"),
 						Nodes: map[string]ArchiveTree{
-							"user2": ArchiveTree{Path: "foo/work/user2"},
+							"user2": ArchiveTree{Path: filepath.FromSlash("foo/work/user2")},
 						},
 					},
 				}},
@@ -221,10 +221,10 @@ func TestNewArchiveTree(t *testing.T) {
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
 					"work": ArchiveTree{
-						FileInfoPath: "foo/work",
-						Path:         "foo/work",
+						FileInfoPath: filepath.FromSlash("foo/work"),
+						Path:         filepath.FromSlash("foo/work"),
 						Nodes: map[string]ArchiveTree{
-							"user2": ArchiveTree{Path: "foo/work/user2"},
+							"user2": ArchiveTree{Path: filepath.FromSlash("foo/work/user2")},
 						},
 					},
 				}},
@@ -234,13 +234,13 @@ func TestNewArchiveTree(t *testing.T) {
 			unix:    true,
 			targets: []string{"/mnt/driveA", "/mnt/driveA/work/driveB"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
-				"mnt": ArchiveTree{Root: "/", FileInfoPath: "/mnt", Nodes: map[string]ArchiveTree{
+				"mnt": ArchiveTree{Root: "/", FileInfoPath: filepath.FromSlash("/mnt"), Nodes: map[string]ArchiveTree{
 					"driveA": ArchiveTree{
-						Path:         "/mnt/driveA",
-						FileInfoPath: "/mnt/driveA",
+						Path:         filepath.FromSlash("/mnt/driveA"),
+						FileInfoPath: filepath.FromSlash("/mnt/driveA"),
 						Nodes: map[string]ArchiveTree{
-							"work": ArchiveTree{FileInfoPath: "/mnt/driveA/work", Nodes: map[string]ArchiveTree{
-								"driveB": ArchiveTree{Path: "/mnt/driveA/work/driveB"},
+							"work": ArchiveTree{FileInfoPath: filepath.FromSlash("/mnt/driveA/work"), Nodes: map[string]ArchiveTree{
+								"driveB": ArchiveTree{Path: filepath.FromSlash("/mnt/driveA/work/driveB")},
 							}},
 						},
 					},
@@ -251,8 +251,8 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"foo/work/user", "foo/work/user"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"work": ArchiveTree{FileInfoPath: "foo/work", Nodes: map[string]ArchiveTree{
-						"user": ArchiveTree{Path: "foo/work/user"},
+					"work": ArchiveTree{FileInfoPath: filepath.FromSlash("foo/work"), Nodes: map[string]ArchiveTree{
+						"user": ArchiveTree{Path: filepath.FromSlash("foo/work/user")},
 					}},
 				}},
 			}},
@@ -261,8 +261,8 @@ func TestNewArchiveTree(t *testing.T) {
 			targets: []string{"./foo/work/user", "foo/work/user"},
 			want: ArchiveTree{Nodes: map[string]ArchiveTree{
 				"foo": ArchiveTree{Root: ".", FileInfoPath: "foo", Nodes: map[string]ArchiveTree{
-					"work": ArchiveTree{FileInfoPath: "foo/work", Nodes: map[string]ArchiveTree{
-						"user": ArchiveTree{Path: "foo/work/user"},
+					"work": ArchiveTree{FileInfoPath: filepath.FromSlash("foo/work"), Nodes: map[string]ArchiveTree{
+						"user": ArchiveTree{Path: filepath.FromSlash("foo/work/user")},
 					}},
 				}},
 			}},
