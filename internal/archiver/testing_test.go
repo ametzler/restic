@@ -96,7 +96,7 @@ func TestTestCreateFiles(t *testing.T) {
 				"foo":             TestFile{Content: "foo"},
 				"subdir":          TestDir{},
 				"subdir/subfile":  TestFile{Content: "bar"},
-				"sub/subsub/link": TestSymlink{Target: "/x"},
+				"sub/subsub/link": TestSymlink{Target: filepath.Join(filepath.VolumeName(""), filepath.FromSlash("/x"))},
 			},
 		},
 	}
