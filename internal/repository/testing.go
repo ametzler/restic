@@ -27,13 +27,6 @@ type logger interface {
 
 // TestUseLowSecurityKDFParameters configures low-security KDF parameters for testing.
 func TestUseLowSecurityKDFParameters(t logger) {
-	if testingTB, ok := t.(testing.TB); ok {
-		test.Helper(testingTB).Helper()
-	}
-	if testingTB, ok := t.(testing.TB); ok {
-		test.Helper(testingTB).Helper()
-	}
-	t.Logf("using low-security KDF parameters for test")
 	Params = &testKDFParams
 }
 
