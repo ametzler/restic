@@ -52,6 +52,7 @@ func (arch *NewArchiver) SaveFile(ctx context.Context, filename string) (*restic
 		return nil, errors.Errorf("node type %q is wrong", node.Type)
 	}
 
+	node.Content = []restic.ID{}
 	buf := make([]byte, chunker.MinSize)
 	for {
 		chunk, err := chnker.Next(buf)
@@ -204,6 +205,8 @@ func (arch *NewArchiver) saveArchiveTree(ctx context.Context, prefix string, atr
 				return nil, err
 			}
 
+			node.Name = name
+
 			err = tree.Insert(node)
 			if err != nil {
 				return nil, err
@@ -223,13 +226,26 @@ func (arch *NewArchiver) saveArchiveTree(ctx context.Context, prefix string, atr
 			return nil, err
 		}
 
+		if subatree.FileInfoPath == "" {
+			return nil, errors.Errorf("FileInfoPath for %v/%v is empty", prefix, name)
+		}
+
 		debug.Log("%v, saved subtree %v as %v", prefix, subtree, id.Str())
 
-		node := &restic.Node{
-			Name:    name,
-			Type:    "dir",
-			Subtree: &id,
+		fi, err := fs.Lstat(subatree.FileInfoPath)
+		if err != nil {
+			return nil, err
 		}
+
+		debug.Log("%v, dir node data loaded from %v", prefix, subatree.FileInfoPath)
+
+		node, err := restic.NodeFromFileInfo(subatree.FileInfoPath, fi)
+		if err != nil {
+			return nil, err
+		}
+
+		node.Name = name
+		node.Subtree = &id
 
 		err = tree.Insert(node)
 		if err != nil {

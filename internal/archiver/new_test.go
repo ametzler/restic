@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/restic/restic/internal/checker"
 	"github.com/restic/restic/internal/fs"
 	"github.com/restic/restic/internal/repository"
 	"github.com/restic/restic/internal/restic"
@@ -271,6 +272,47 @@ func TestNewArchiverSnapshot(t *testing.T) {
 			targets: []string{"."},
 		},
 		{
+			name: "subdir",
+			src: TestDir{
+				"subdir": TestDir{
+					"foo": TestFile{Content: "foo"},
+					"subsubdir": TestDir{
+						"foo": TestFile{Content: "foo in subsubdir"},
+					},
+				},
+				"other": TestFile{Content: "another file"},
+			},
+			targets: []string{"subdir"},
+			want: TestDir{
+				"subdir": TestDir{
+					"foo": TestFile{Content: "foo"},
+					"subsubdir": TestDir{
+						"foo": TestFile{Content: "foo in subsubdir"},
+					},
+				},
+			},
+		},
+		{
+			name: "subsubdir",
+			src: TestDir{
+				"subdir": TestDir{
+					"foo": TestFile{Content: "foo"},
+					"subsubdir": TestDir{
+						"foo": TestFile{Content: "foo in subsubdir"},
+					},
+				},
+				"other": TestFile{Content: "another file"},
+			},
+			targets: []string{"subdir/subsubdir"},
+			want: TestDir{
+				"subdir": TestDir{
+					"subsubdir": TestDir{
+						"foo": TestFile{Content: "foo in subsubdir"},
+					},
+				},
+			},
+		},
+		{
 			name: "parent-dir",
 			src: TestDir{
 				"subdir": TestDir{
@@ -376,6 +418,28 @@ func TestNewArchiverSnapshot(t *testing.T) {
 			},
 			targets: []string{"subdir/subsubdir", "subdir"},
 		},
+		{
+			name: "collision",
+			src: TestDir{
+				"subdir": TestDir{
+					"foo": TestFile{Content: "foo in subdir"},
+					"subsubdir": TestDir{
+						"foo": TestFile{Content: "foo in subsubdir"},
+					},
+				},
+				"foo": TestFile{Content: "another file"},
+			},
+			chdir:   "subdir",
+			targets: []string{".", "../foo"},
+			want: TestDir{
+
+				"foo": TestFile{Content: "foo in subdir"},
+				"subsubdir": TestDir{
+					"foo": TestFile{Content: "foo in subsubdir"},
+				},
+				"foo-1": TestFile{Content: "another file"},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -416,6 +480,8 @@ func TestNewArchiverSnapshot(t *testing.T) {
 				want = test.src
 			}
 			TestEnsureSnapshot(t, repo, snapshotID, want)
+
+			checker.TestCheckRepo(t, repo)
 		})
 	}
 }

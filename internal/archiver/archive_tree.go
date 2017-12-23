@@ -10,9 +10,10 @@ import (
 
 // ArchiveTree defines how a snapshot should look like when archived.
 type ArchiveTree struct {
-	Nodes map[string]ArchiveTree
-	Path  string
-	Root  string
+	Nodes        map[string]ArchiveTree
+	Path         string // where the files/dirs to be saved are found
+	FileInfoPath string // where the dir can be found that is not included itself, but its subdirs
+	Root         string // parent directory of the tree
 }
 
 // pathComponents returns all path components of p.
@@ -119,10 +120,12 @@ func (t *ArchiveTree) Add(target string) error {
 	}
 
 	if len(pc) > 1 {
-		err := tree.add(target, pc[1:])
+		subroot := filepath.Join(root, origName)
+		err := tree.add(target, subroot, pc[1:])
 		if err != nil {
 			return err
 		}
+		tree.FileInfoPath = subroot
 	} else {
 		debug.Log("leaf node, nodes: %v", len(tree.Nodes))
 		tree.Path = target
@@ -133,7 +136,7 @@ func (t *ArchiveTree) Add(target string) error {
 }
 
 // add adds a new target path into the tree.
-func (t *ArchiveTree) add(target string, pc []string) error {
+func (t *ArchiveTree) add(target, root string, pc []string) error {
 	debug.Log("%v/%v", target, pc[0])
 
 	debug.Log("subtree, path is %q", t.Path)
@@ -172,7 +175,10 @@ func (t *ArchiveTree) add(target string, pc []string) error {
 		tree = other
 	}
 
-	err := tree.add(target, pc[1:])
+	subroot := filepath.Join(root, name)
+	tree.FileInfoPath = subroot
+
+	err := tree.add(target, subroot, pc[1:])
 	if err != nil {
 		return err
 	}
