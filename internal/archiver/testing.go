@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,7 +53,7 @@ func (s TestSymlink) String() string {
 }
 
 // TestCreateFiles creates a directory structure described by dir at target,
-// which must already exist.
+// which must already exist. On Windows, symlinks aren't created.
 func TestCreateFiles(t testing.TB, target string, dir TestDir) {
 	test.Helper(t).Helper()
 	for name, item := range dir {
@@ -64,6 +66,10 @@ func TestCreateFiles(t testing.TB, target string, dir TestDir) {
 				t.Fatal(err)
 			}
 		case TestSymlink:
+			if runtime.GOOS == "windows" {
+				continue
+			}
+
 			err := fs.Symlink(filepath.FromSlash(it.Target), targetPath)
 			if err != nil {
 				t.Fatal(err)
@@ -84,7 +90,7 @@ func TestCreateFiles(t testing.TB, target string, dir TestDir) {
 type TestWalkFunc func(path string, item interface{}) error
 
 // TestWalkFiles runs fn for each file/directory in dir, the filename will be
-// constructed with target as the prefix.
+// constructed with target as the prefix. Symlinks on Windows are ignored.
 func TestWalkFiles(t testing.TB, target string, dir TestDir, fn TestWalkFunc) {
 	test.Helper(t).Helper()
 	for name, item := range dir {
@@ -102,6 +108,17 @@ func TestWalkFiles(t testing.TB, target string, dir TestDir, fn TestWalkFunc) {
 	}
 }
 
+// fixpath removes UNC paths (starting with `\\?`) on windows. On Linux, it's a noop.
+func fixpath(item string) string {
+	if runtime.GOOS != "windows" {
+		return item
+	}
+	if strings.HasPrefix(item, `\\?`) {
+		return item[4:]
+	}
+	return item
+}
+
 // TestEnsureFiles tests if the directory structure at target is the same as
 // described in dir.
 func TestEnsureFiles(t testing.TB, target string, dir TestDir) {
@@ -110,6 +127,16 @@ func TestEnsureFiles(t testing.TB, target string, dir TestDir) {
 
 	// first, test that all items are there
 	TestWalkFiles(t, target, dir, func(path string, item interface{}) error {
+		// ignore symlinks on Windows
+		if _, ok := item.(TestSymlink); ok && runtime.GOOS == "windows" {
+			// mark paths and parents as checked
+			pathsChecked[path] = struct{}{}
+			for parent := filepath.Dir(path); parent != target; parent = filepath.Dir(parent) {
+				pathsChecked[parent] = struct{}{}
+			}
+			return nil
+		}
+
 		fi, err := fs.Lstat(path)
 		if err != nil {
 			return err
@@ -166,6 +193,8 @@ func TestEnsureFiles(t testing.TB, target string, dir TestDir) {
 			return err
 		}
 
+		path = fixpath(path)
+
 		if path == target {
 			return nil
 		}
@@ -208,7 +237,8 @@ func TestEnsureFileContent(ctx context.Context, t testing.TB, repo restic.Reposi
 	}
 }
 
-// TestEnsureTree checks that the tree ID in the repo matches dir.
+// TestEnsureTree checks that the tree ID in the repo matches dir. On Windows,
+// Symlinks are ignored.
 func TestEnsureTree(ctx context.Context, t testing.TB, prefix string, repo restic.Repository, treeID restic.ID, dir TestDir) {
 	test.Helper(t).Helper()
 
@@ -255,6 +285,10 @@ func TestEnsureTree(ctx context.Context, t testing.TB, prefix string, repo resti
 			}
 			TestEnsureFileContent(ctx, t, repo, nodePrefix, node, e)
 		case TestSymlink:
+			// skip symlinks on windows
+			if runtime.GOOS == "windows" {
+				continue
+			}
 			if node.Type != "symlink" {
 				t.Errorf("tree node %v has wrong type %q, want %q", nodePrefix, node.Type, "file")
 			}
@@ -266,6 +300,12 @@ func TestEnsureTree(ctx context.Context, t testing.TB, prefix string, repo resti
 	}
 
 	for name := range dir {
+		// skip checking symlinks on Windows
+		entry := dir[name]
+		if _, ok := entry.(TestSymlink); ok && runtime.GOOS == "windows" {
+			continue
+		}
+
 		_, ok := checked[name]
 		if !ok {
 			t.Errorf("tree %v: expected node %q not found, has: %v", prefix, name, nodeNames)
@@ -274,7 +314,7 @@ func TestEnsureTree(ctx context.Context, t testing.TB, prefix string, repo resti
 }
 
 // TestEnsureSnapshot tests if the snapshot in the repo has exactly the same
-// structure as dir.
+// structure as dir. On Windows, Symlinks are ignored.
 func TestEnsureSnapshot(t testing.TB, repo restic.Repository, snapshotID restic.ID, dir TestDir) {
 	test.Helper(t).Helper()
 	ctx, cancel := context.WithCancel(context.Background())
