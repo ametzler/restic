@@ -230,7 +230,7 @@ func TestEnsureTree(ctx context.Context, t testing.TB, prefix string, repo resti
 
 		entry, ok := dir[node.Name]
 		if !ok {
-			t.Errorf("tree node %q not found in TestDir: %#v", node.Name, dir)
+			t.Errorf("unexpected tree node %q found, want: %#v", node.Name, dir)
 			return
 		}
 

@@ -356,13 +356,15 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				filepath.FromSlash("x/y/link"):       TestSymlink{Target: filepath.FromSlash("../../foo")},
 			},
 			want: TestDir{
-				"foo": TestFile{Content: "foo"},
-				"subdir": TestDir{
-					"subfile": TestFile{Content: "bar"},
-				},
-				"x": TestDir{
-					"y": TestDir{
-						"link": TestSymlink{Target: filepath.FromSlash("../../foo")},
+				"target": TestDir{
+					"foo": TestFile{Content: "foo"},
+					"subdir": TestDir{
+						"subfile": TestFile{Content: "bar"},
+					},
+					"x": TestDir{
+						"y": TestDir{
+							"link": TestSymlink{Target: filepath.FromSlash("../../foo")},
+						},
 					},
 				},
 			},
@@ -373,7 +375,9 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"foo": TestFile{Content: "foo"},
 			},
 			want: TestDir{
-				"bar": TestFile{Content: "foo"},
+				"target": TestDir{
+					"bar": TestFile{Content: "foo"},
+				},
 			},
 		},
 		{
@@ -383,7 +387,9 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"bar": TestFile{Content: "bar"},
 			},
 			want: TestDir{
-				"foo": TestFile{Content: "foo"},
+				"target": TestDir{
+					"foo": TestFile{Content: "foo"},
+				},
 			},
 		},
 		{
@@ -392,8 +398,10 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"foo": TestFile{Content: "foo"},
 			},
 			want: TestDir{
-				"foo": TestFile{Content: "foo"},
-				"bar": TestFile{Content: "bar"},
+				"target": TestDir{
+					"foo": TestFile{Content: "foo"},
+					"bar": TestFile{Content: "bar"},
+				},
 			},
 		},
 		{
@@ -402,7 +410,20 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"foo": TestFile{Content: "foo"},
 			},
 			want: TestDir{
-				"foo": TestDir{
+				"target": TestDir{
+					"foo": TestDir{
+						"foo": TestFile{Content: "foo"},
+					},
+				},
+			},
+		},
+		{
+			expectFailure: true,
+			files: map[string]interface{}{
+				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z")},
+			},
+			want: TestDir{
+				"target": TestDir{
 					"foo": TestFile{Content: "foo"},
 				},
 			},
@@ -413,16 +434,9 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z")},
 			},
 			want: TestDir{
-				"foo": TestFile{Content: "foo"},
-			},
-		},
-		{
-			expectFailure: true,
-			files: map[string]interface{}{
-				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z")},
-			},
-			want: TestDir{
-				"foo": TestSymlink{Target: filepath.FromSlash("x/y/z2")},
+				"target": TestDir{
+					"foo": TestSymlink{Target: filepath.FromSlash("x/y/z2")},
+				},
 			},
 		},
 		{
@@ -431,7 +445,9 @@ func TestTestEnsureSnapshot(t *testing.T) {
 				"foo": TestFile{Content: "foo"},
 			},
 			want: TestDir{
-				"foo": TestFile{Content: "xxx"},
+				"target": TestDir{
+					"foo": TestFile{Content: "xxx"},
+				},
 			},
 		},
 	}
